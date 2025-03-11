@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product - Your Company</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin-top: 30px;
+            color: #555;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #28a745;
+            color: #ffffff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .product-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            transition: box-shadow 0.3s;
+        }
+        .product-item:hover {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        /* Flexbox for layout */
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .add-product, .existing-products {
+            flex: 1;
+            min-width: 300px; /* Ensure a minimum width */
+            margin: 10px; /* Spacing between sections */
+            background-color: #f2f2f2;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            border-radius: 4px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            h1, h2 {
+                font-size: 1.5em;
+            }
+            .flex-container {
+                flex-direction: column; /* Stack sections on smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="container">
+        
+        <div class="flex-container">
+            
+            <div class="add-product">
+                <h1>Add New Product</h1>
+                <hr>
+                <form action="/add-product" method="POST">
+                    <div>
+                        <label for="name">Product Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div>
+                        <label for="price">Price:</label>
+                        <input type="number" id="price" name="price" required>
+                    </div>
+                    <div>
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" rows="4"></textarea>
+                    </div>
+                    <div>
+                        <label for="imageUrl">Image URL:</label>
+                        <input type="text" id="imageUrl" name="imageUrl">
+                    </div>
+                    <button type="submit">Add Product</button>
+                </form>
+            </div>
+
+            <div class="existing-products">
+                <h2>Existing Products</h2>
+                <% if (products.length > 0) { %>
+                    <% products.forEach(product => { %>
+                        <div class="product-item">
+                            <h3><%= product.name %></h3>
+                            <img src="<%= product.imageUrl %>" alt="<%= product.name %>">
+                            <p>Price: $<%= product.price %></p>
+                            <p>Description: <%= product.description %></p>
+                            <button onclick="openModal('<%= product._id %>', '<%= product.name %>', '<%= product.price %>', '<%= product.description %>',
+                             '<%= product.imageUrl %>')">Update</button>
+                            <form action="/delete-product/<%= product._id %>" method="POST" style="display: inline;">
+                                <button type="submit" onclick="return confirm('Are you sure you want to delete this product?');">Delete</button>
+                            </form>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p>No products found.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- The Modal -->
+    <div id="updateModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Update Product</h2>
+            <form id="updateForm" action="" method="POST">
+                <div>
+                    <label for="modal-name">Product Name:</label>
+                    <input type="text" id="modal-name" name="name" required>
+                </div>
+                <div>
+                    <label for="modal-price">Price:</label>
+                    <input type="number" id="modal-price" name="price" required>
+                </div>
+                <div>
+                    <label for="modal-description">Description:</label>
+                    <textarea id="modal-description" name="description" rows="4"></textarea>
+                </div>
+                <div>
+                    <label for="modal-imageUrl">Image URL:</label>
+                    <input type="text" id="modal-imageUrl" name="imageUrl">
+                </div>
+                <button type="submit">Update Product</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id, name, price, description, imageUrl) {
+            // Set the form action for updating the product
+            const form = document.getElementById('updateForm');
+            form.action = `/update-product/${id}`;
+            
+            // Fill the form with existing product data
+            document.getElementById('modal-name').value = name;
+            document.getElementById('modal-price').value = price;
+            document.getElementById('modal-description').value = description;
+            document.getElementById('modal-imageUrl').value = imageUrl;
+
+            // Display the modal
+            document.getElementById('updateModal').style.display = "block";
+        }
+
+        function closeModal() {
+            // Hide the modal
+            document.getElementById('updateModal').style.display = "none";
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('updateModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

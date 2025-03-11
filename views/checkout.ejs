@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Container */
+        main {
+            width: 80%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Total Styles */
+        h3 {
+            text-align: right;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 24px;
+            color: #333;
+        }
+
+        /* Checkout Button Styles */
+        .checkout-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px 30px;
+            text-align: center;
+            border-radius: 4px;
+            font-size: 18px;
+            margin: 20px 0;
+            text-decoration: none;
+        }
+
+        .checkout-button:hover {
+            background-color: #82bdf8;
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+        /* Product List Styles */
+        .product-list {
+            margin: 20px 0;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                width: 95%;
+            }
+
+            .checkout-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar', { user: user }) %>
+
+    <main>
+        <h1>Checkout</h1>
+        
+        <!-- Display Product Information -->
+        <div class="product-list">
+            <% cartItems.forEach(item => { %>
+                <div class="product-item">
+                    <span><%= item.name %></span>
+                    <span><%= (totalAmount / 100).toFixed(2) %> $</span> <!-- Price displayed correctly -->
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Display total amount -->
+        <h3>Total Amount: <span id="total-amount"><%= (totalAmount / 100).toFixed(2) %></span> $</h3>
+        
+        <!-- Checkout Button -->
+        <a href="#" class="checkout-button" id="checkout-button">Proceed to Checkout</a>
+    </main>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        // The total amount from the backend (in paise)
+        const totalAmountInPaise = '<%= totalAmount %>'; // Corrected to pass totalAmount directly
+
+        document.getElementById('total-amount').innerText = (totalAmountInPaise / 100).toFixed(2); // Display total amount in INR
+
+        document.getElementById('checkout-button').addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Call your backend to create the Razorpay order
+            fetch('/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    amount: totalAmountInPaise, // Send the total amount in paise
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(order => {
+                const options = {
+                    key: "rzp_test_qwUWbYhsbam1oJ", // Your Razorpay key ID
+                    amount: order.amount,
+                    currency: order.currency,
+                    name: "Your Company Name",
+                    description: "Test Transaction",
+                    order_id: order.id,
+                    handler: function (response) {
+                        alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
+                        // Redirect to a success page or handle the success
+                    },
+                    prefill: {
+                        name: "Customer Name",
+                        email: "customer@example.com",
+                        contact: "9999999999",
+                    },
+                    notes: {
+                        address: "Customer address",
+                    },
+                    theme: {
+                        color: "#007bff",
+                    },
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the payment. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>

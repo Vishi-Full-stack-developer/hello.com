@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Container */
+        main {
+            width: 80%;
+            max-width: 1200px; /* Limit the max width */
+            margin: 20px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 0, 0, 0.1); /* Light red on hover */
+            transition: background-color 0.3s;
+        }
+
+        /* Input and Button Styles */
+        input[type="number"] {
+            width: 60px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px; /* Increased font size */
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: #007bff; /* Change border color on focus */
+            outline: none; /* Remove default outline */
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px; /* Increased font size */
+            transition: background-color 0.3s, transform 0.2s; /* Added transform transition */
+        }
+
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px); /* Button lift effect */
+        }
+
+        button:active {
+            transform: translateY(0); /* Reset lift on click */
+        }
+
+        /* Total Styles */
+        h3 {
+            text-align: right;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 24px; /* Increased font size for total */
+            color: #333;
+        }
+
+        /* Checkout Button Styles */
+        .checkout-button {
+            display: inline-block; /* Change to inline-block for better alignment */
+            background-color: #007bff; /* Button background color */
+            color: #fff; /* Button text color */
+            padding: 15px 30px;
+            text-align: center;
+            border-radius: 4px;
+            font-size: 18px; /* Increased font size */
+            margin: 20px 0; /* Margin around the button */
+           
+        }
+
+        .checkout-button:hover {
+            background-color: #82bdf8; /* Darker shade on hover */
+            transform: translateY(-2px); /* Button lift effect */
+            border-color: #0056b3; /* Add border color on hover */
+            text-decoration: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            main {
+                width: 95%; /* Adjust width for smaller screens */
+            }
+
+            table {
+                font-size: 14px; /* Smaller font size for tables */
+            }
+
+            button,
+            .checkout-button {
+                width: 100%; /* Full-width buttons on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    <main>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% cart.products.forEach(item => { %>
+                    <tr>
+                        <td><%= item.productName %></td>
+                        <td><%= item.productPrice.toFixed(2) %></td>
+                        <td>
+                            <form action="/cart/update-quantity/<%= item.productId %>" method="POST">
+                                <input type="number" name="newQuantity" value="<%= item.quantity %>" min="1" required>
+                                <button type="submit">Update</button>
+                            </form>
+                        </td>
+                        <td><%= (item.productPrice * item.quantity).toFixed(2) %></td>
+                        <td>
+                            <form action="/cart/remove/<%= item.productId %>" method="POST">
+                                <button type="submit">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+        <h3>Total: <%= cart.products.reduce((total, item) => total + (item.productPrice * item.quantity), 0).toFixed(2) %></h3>
+
+        <!-- Checkout Button -->
+        <a href="/checkout" class="checkout-button">Proceed to Checkout</a>
+
+
+
+    </main>
+
+    <script>
+        // Example function to update the cart count dynamically
+function updateCartCount(newCount) {
+    const cartLink = document.querySelector('.nav-link[href="/cart"]');
+    cartLink.innerHTML = `Cart (${newCount})`;
+}
+
+// Function to simulate adding an item to the cart
+function addToCart(productId) {
+    fetch(`/add-to-cart/${productId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update the cart count dynamically
+        updateCartCount(data.cartItemCount);
+    });
+}
+
+    </script>
+</body>
+</html>

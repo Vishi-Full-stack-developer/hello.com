@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        /* admin.css */
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+            color: #555;
+            margin-top: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        form {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px; /* Add margin for better spacing */
+        }
+
+        form input[type="text"],
+        form input[type="email"],
+        form input[type="password"],
+        form input[type="number"],
+        form input[type="file"] {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 200px; /* Minimum width for inputs */
+        }
+
+        form select {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button[type="submit"] {
+            margin-left: 5px;
+        }
+
+        h2 + form {
+            margin-top: 15px;
+        }
+
+        .container table {
+            margin-top: 15px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 600px) {
+            form {
+                flex-direction: column; /* Stack the form inputs on smaller screens */
+                align-items: stretch; /* Stretch form inputs to full width */
+            }
+
+            form input[type="text"],
+            form input[type="email"],
+            form input[type="password"],
+            form input[type="number"],
+            form input[type="file"],
+            form select {
+                margin-right: 0; /* Remove right margin */
+                margin-bottom: 10px; /* Add bottom margin for spacing */
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+
+        <!-- Users management section -->
+        <h2>Users</h2>
+        <table>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+            <% users.forEach(user => { %>
+            <tr>
+                <td><%= user.username %></td>
+                <td><%= user.email %></td>
+                <td><%= user.role %></td>
+                <td>
+                    <!-- Update User Form -->
+                    <form action="/admin/update-user/<%= user._id %>" method="POST" style="display:inline;">
+                        <input type="text" name="username" value="<%= user.username %>" required>
+                        <input type="email" name="email" value="<%= user.email %>" required>
+                        <select name="role">
+                            <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>User</option>
+                            <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+
+                    <!-- Delete User Form -->
+                    <form action="/admin/delete-user/<%= user._id %>" method="POST" style="display:inline;">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <% }) %>
+        </table>
+
+        <hr>
+<br><br><br><br>
+        <!-- Add New User Form -->
+        <h2>Add New User</h2>
+        <form action="/admin/add-user" method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <select name="role">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button type="submit">Add User</button>
+        </form>
+<br><br><br>
+       
+    </div>
+</body>
+</html>
