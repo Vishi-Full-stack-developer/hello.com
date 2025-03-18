@@ -12,8 +12,8 @@ const Razorpay = require('razorpay');
 
 // Initialize the Razorpay instance
 const razorpayInstance = new Razorpay({
-    key_id: 'rzp_test_qwUWbYhsbam1oJ',
-    key_secret: 'NKuKFl5Q2PcW5poRLqXNaqOE',
+    key_id: '',
+    key_secret: '',
 });
 
 // Connect to MongoDB
